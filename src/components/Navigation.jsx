@@ -23,7 +23,7 @@ const Navigation = () => {
             <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">⚽</span>
             </div>
-            <span className="font-bold text-xl gradient-text">Futsal Manager</span>
+            <span className="font-bold text-xl gradient-text">Futsal</span>
           </Link>
 
           <div className="flex space-x-1">
