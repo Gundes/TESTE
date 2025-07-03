@@ -30,7 +30,7 @@ const TransactionForm = ({ type, onSave, closeDialog }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="amount" className="text-white">Valor (R$)</Label>
+        <Label htmlFor="amount" className="text-white">Valor (€)</Label>
         <Input
           id="amount"
           type="number"
@@ -116,7 +116,7 @@ const PiggyBank = () => {
         <PiggyBankIcon className="w-16 h-16 text-pink-400 mx-auto mb-4" />
         <p className="text-gray-300 text-lg">Saldo Atual</p>
         <p className="text-5xl font-bold text-white">
-          R$ {balance.toFixed(2).replace('.', ',')}
+          € {balance.toFixed(2).replace('.', ',')}
         </p>
       </motion.div>
 
@@ -182,7 +182,7 @@ const PiggyBank = () => {
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
                     <p className={`font-semibold ${item.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
-                      {item.type === 'income' ? '+' : '-'} R$ {item.amount.toFixed(2).replace('.', ',')}
+                      {item.type === 'income' ? '+' : '-'} € {item.amount.toFixed(2).replace('.', ',')}
                     </p>
                     <div className="flex items-center space-x-2 text-gray-400 text-sm">
                       <Calendar className="w-3 h-3" />
