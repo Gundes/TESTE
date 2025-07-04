@@ -1,140 +1,104 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 const History = () => {
   const [games] = useLocalStorage('futsal-games', []);
-
   const sortedGames = [...games].sort((a, b) => new Date(b.date) - new Date(a.date));
 
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fineValue, setFineValue] = useState('');
+
+  const openModal = (player) => {
+    setSelectedPlayer(player);
+    setFineValue('');
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedPlayer(null);
+    setFineValue('');
+  };
+
+  const handleConfirmPayment = () => {
+    console.log(`Pagamento confirmado para ${selectedPlayer.name} com multa de R$ ${fineValue || '0'}`);
+    closeModal();
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
-      >
-        <h1 className="text-3xl font-bold text-white">Histórico de Partidas</h1>
-        <p className="text-gray-300">Acompanhe todos os jogos realizados</p>
-      </motion.div>
+    <>
+      <h1>Histórico de Partidas</h1>
+      <p>Acompanhe todos os jogos realizados</p>
 
-      {/* Games List */}
       {sortedGames.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12"
-        >
-          <Trophy className="w-24 h-24 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">Nenhum jogo registado</h3>
-          <p className="text-gray-300">Os jogos aparecerão aqui após serem registados</p>
-        </motion.div>
+        <>
+          <h3>Nenhum jogo registado</h3>
+          <p>Os jogos aparecerão aqui após serem registados</p>
+        </>
       ) : (
-        <div className="space-y-6">
-          {sortedGames.map((game, index) => (
-            <motion.div
-              key={game.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              className="glass-effect rounded-xl p-6"
-            >
-              {/* Game Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
-                    <Trophy className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      Jogo #{sortedGames.length - index}
-                    </h3>
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <Calendar className="w-4 h-4" />
-                      <span>{new Date(game.date).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-green-400 font-semibold">
-                    Equipa {game.winnerTeam} Venceu
-                  </p>
-                  <p className="text-gray-300 text-sm">
-                    ±{game.pointsChange} estrelas
-                  </p>
-                </div>
-              </div>
+        sortedGames.map((game, index) => (
+          <div key={index} className="game-card">
+            <h3>Jogo #{sortedGames.length - index}</h3>
+            <p>{new Date(game.date).toLocaleDateString('pt-BR')}</p>
+            <p>Equipa {game.winnerTeam} Venceu ±{game.pointsChange} estrelas</p>
 
-              {/* Teams */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {/* Team 1 */}
-                <div className={`p-4 rounded-lg ${game.winnerTeam === 1 ? 'bg-green-500/20 border border-green-500/30' : 'bg-white/5'}`}>
-                  <h4 className="font-semibold text-white mb-3 flex items-center">
-                    Equipa 1
-                    {game.winnerTeam === 1 && <Trophy className="w-4 h-4 ml-2 text-yellow-400" />}
-                  </h4>
-                  <div className="space-y-2">
-                    {game.team1.map((player) => (
-                      <div key={player.id} className="text-gray-300">
-                        {player.name} ({player.rank}⭐)
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Team 2 */}
-                <div className={`p-4 rounded-lg ${game.winnerTeam === 2 ? 'bg-green-500/20 border border-green-500/30' : 'bg-white/5'}`}>
-                  <h4 className="font-semibold text-white mb-3 flex items-center">
-                    Equipa 2
-                    {game.winnerTeam === 2 && <Trophy className="w-4 h-4 ml-2 text-yellow-400" />}
-                  </h4>
-                  <div className="space-y-2">
-                    {game.team2.map((player) => (
-                      <div key={player.id} className="text-gray-300">
-                        {player.name} ({player.rank}⭐)
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <h4>Equipa 1 {game.winnerTeam === 1 && <Trophy />}</h4>
+            {game.team1.map((player) => (
+              <div key={player.name}>
+                <span>{player.name} ({player.rank}⭐)</span>
+                <button onClick={() => openModal(player)}>Pagar</button>
               </div>
+            ))}
 
-              {/* Rank Changes */}
-              <div className="border-t border-white/10 pt-4">
-                <h4 className="font-semibold text-white mb-3">Alterações de Ranking</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {game.rankChanges.map((change) => (
-                    <div
-                      key={change.playerId}
-                      className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
-                    >
-                      <span className="text-white">{change.playerName}</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-gray-300 text-sm">
-                          {change.oldRank} → {change.newRank}
-                        </span>
-                        <span className={`flex items-center text-sm ${
-                          change.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {change.change.startsWith('+') ? (
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3 mr-1" />
-                          )}
-                          {change.change}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <h4>Equipa 2 {game.winnerTeam === 2 && <Trophy />}</h4>
+            {game.team2.map((player) => (
+              <div key={player.name}>
+                <span>{player.name} ({player.rank}⭐)</span>
+                <button onClick={() => openModal(player)}>Pagar</button>
               </div>
-            </motion.div>
-          ))}
+            ))}
+
+            <h4>Alterações de Ranking</h4>
+            {game.rankChanges.map((change, i) => (
+              <div key={i}>
+                <span>{change.playerName}</span>
+                <span>{change.oldRank} → {change.newRank}</span>
+                {change.change.startsWith('+') ? <TrendingUp /> : <TrendingDown />}
+                <span>{change.change}</span>
+              </div>
+            ))}
+          </div>
+        ))
+      )}
+
+      {/* Modal de Pagamento */}
+      {isModalOpen && selectedPlayer && (
+        <div className="modal-overlay">
+          <motion.div className="modal" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+            <h2>Pagamento</h2>
+            <p>Jogador: <strong>{selectedPlayer.name}</strong></p>
+
+            <label>
+              Multa (R$):
+              <input
+                type="number"
+                value={fineValue}
+                onChange={(e) => setFineValue(e.target.value)}
+                placeholder="0.00"
+              />
+            </label>
+
+            <div className="modal-actions">
+              <button onClick={handleConfirmPayment}>Confirmar Pagamento</button>
+              <button onClick={closeModal}>Cancelar</button>
+            </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
